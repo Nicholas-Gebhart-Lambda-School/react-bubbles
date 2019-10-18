@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import editColorList from '../services/editColor';
 import deleteColorList from '../services/deleteColor';
+import addColor from '../services/addColor';
 const initialColor = {
   color: '',
   code: { hex: '' }
@@ -10,6 +11,13 @@ const ColorList = ({ colors, updateColors }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const [newColor, setNewColor] = useState('');
+
+  const handleChanges = e => {
+    console.log(newColor);
+    const { name, value } = e.target;
+    setNewColor({ ...newColor, [name]: value });
+  };
 
   const editColor = color => {
     setEditing(true);
@@ -86,9 +94,44 @@ const ColorList = ({ colors, updateColors }) => {
         </form>
       )}
       <div className="spacer" />
-      {/* stretch - build another form here to add a color */}
+      <form>
+        <input
+          type="text"
+          name="color"
+          placeholder="color"
+          value={newColor.color}
+          onChange={handleChanges}
+        />
+        <input
+          type="text"
+          name="hex"
+          placeholder="hex"
+          value={newColor.hex}
+          onChange={handleChanges}
+        />
+        <button
+          onClick={e => {
+            console.log('red');
+            e.preventDefault();
+            addColor(newColor.color, newColor.hex).then(res =>
+              updateColors(res.data)
+            );
+            setNewColor({ color: '', hex: '' });
+          }}
+        >
+          Add Color
+        </button>
+      </form>
     </div>
   );
 };
 
 export default ColorList;
+
+// {
+// color: "aquamarine",
+// code: {
+// hex: "#7fffd4"
+// },
+// id: 4
+// }
