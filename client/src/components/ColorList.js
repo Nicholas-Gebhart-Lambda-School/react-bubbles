@@ -1,15 +1,23 @@
-import React, { useState } from "react";
-import axios from "axios";
-
+import React, { useState } from 'react';
+import editColorList from '../services/editColor';
+import deleteColorList from '../services/deleteColor';
+import addColor from '../services/addColor';
 const initialColor = {
-  color: "",
-  code: { hex: "" }
+  color: '',
+  code: { hex: '' }
 };
 
 const ColorList = ({ colors, updateColors }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const [newColor, setNewColor] = useState('');
+
+  const handleChanges = e => {
+    console.log(newColor);
+    const { name, value } = e.target;
+    setNewColor({ ...newColor, [name]: value });
+  };
 
   const editColor = color => {
     setEditing(true);
@@ -18,13 +26,22 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-    // Make a put request to save your updated color
-    // think about where will you get the id from...
-    // where is is saved right now?
+    editColorList(colorToEdit, colorToEdit.id)
+      .then(res => {
+        updateColors(
+          colors.map(color => (res.data.id === color.id ? res.data : color))
+        );
+        setEditing(false);
+      })
+      .catch(err => console.error('WHOOPS', err));
   };
 
   const deleteColor = color => {
-    // make a delete request to delete this color
+    // No need for res data, can filter with anonymous function
+    deleteColorList(colorToEdit.id).then(() => {
+      updateColors(colors.filter(({ id }) => color.id !== id));
+      setEditing(false);
+    });
   };
 
   return (
@@ -36,7 +53,7 @@ const ColorList = ({ colors, updateColors }) => {
             <span>
               <span className="delete" onClick={() => deleteColor(color)}>
                 x
-              </span>{" "}
+              </span>{' '}
               {color.color}
             </span>
             <div
@@ -77,9 +94,44 @@ const ColorList = ({ colors, updateColors }) => {
         </form>
       )}
       <div className="spacer" />
-      {/* stretch - build another form here to add a color */}
+      <form>
+        <input
+          type="text"
+          name="color"
+          placeholder="color"
+          value={newColor.color}
+          onChange={handleChanges}
+        />
+        <input
+          type="text"
+          name="hex"
+          placeholder="hex"
+          value={newColor.hex}
+          onChange={handleChanges}
+        />
+        <button
+          onClick={e => {
+            console.log('red');
+            e.preventDefault();
+            addColor(newColor.color, newColor.hex).then(res =>
+              updateColors(res.data)
+            );
+            setNewColor({ color: '', hex: '' });
+          }}
+        >
+          Add Color
+        </button>
+      </form>
     </div>
   );
 };
 
 export default ColorList;
+
+// {
+// color: "aquamarine",
+// code: {
+// hex: "#7fffd4"
+// },
+// id: 4
+// }
