@@ -1,9 +1,8 @@
-import React, { useState } from "react";
-import axios from "axios";
-
+import React, { useState } from 'react';
+import editColorList from '../services/editColor';
 const initialColor = {
-  color: "",
-  code: { hex: "" }
+  color: '',
+  code: { hex: '' }
 };
 
 const ColorList = ({ colors, updateColors }) => {
@@ -18,9 +17,14 @@ const ColorList = ({ colors, updateColors }) => {
 
   const saveEdit = e => {
     e.preventDefault();
-    // Make a put request to save your updated color
-    // think about where will you get the id from...
-    // where is is saved right now?
+    editColorList(colorToEdit, colorToEdit.id)
+      .then(res => {
+        updateColors(
+          colors.map(color => (res.data.id === color.id ? res.data : color))
+        );
+        setEditing(false);
+      })
+      .catch(err => console.error('WHOOPS', err));
   };
 
   const deleteColor = color => {
@@ -36,7 +40,7 @@ const ColorList = ({ colors, updateColors }) => {
             <span>
               <span className="delete" onClick={() => deleteColor(color)}>
                 x
-              </span>{" "}
+              </span>{' '}
               {color.color}
             </span>
             <div
