@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import editColorList from '../services/editColor';
+import deleteColorList from '../services/deleteColor';
 const initialColor = {
   color: '',
   code: { hex: '' }
@@ -28,7 +29,11 @@ const ColorList = ({ colors, updateColors }) => {
   };
 
   const deleteColor = color => {
-    // make a delete request to delete this color
+    // No need for res data, can filter with anonymous function
+    deleteColorList(colorToEdit.id).then(() => {
+      updateColors(colors.filter(({ id }) => color.id !== id));
+      setEditing(false);
+    });
   };
 
   return (
